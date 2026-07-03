@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Резонанс Шумана — бинауральные биения</title>
+<meta name="description" content="Генератор бинауральных биений на частоте резонанса Шумана 7.83 Гц для медитации и сна.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg-deep: #10131C;
+    --bg-panel: #171B27;
+    --line: rgba(232,224,255,0.10);
+    --line-strong: rgba(232,224,255,0.18);
+    --ink: #EDEBF5;
+    --ink-dim: #9C9AB0;
+    --ink-faint: #6B6980;
+    --amber: #E3A55E;
+    --amber-dim: rgba(227,165,94,0.16);
+    --teal: #6FB8AE;
+    --teal-dim: rgba(111,184,174,0.16);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(227,165,94,0.07), transparent 60%),
+      var(--bg-deep);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:0 20px 60px;
+  }
+
+  .wrap{width:100%;max-width:480px;padding-top:clamp(32px,8vh,72px);}
+
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    text-align:center;
+    margin:0 0 10px;
+  }
+
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:clamp(28px,7vw,38px);
+    line-height:1.15;
+    text-align:center;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--amber);
+  }
+
+  .sub{
+    text-align:center;
+    color:var(--ink-dim);
+    font-size:15px;
+    line-height:1.6;
+    max-width:360px;
+    margin:0 auto 40px;
+  }
+
+  .stage{
+    position:relative;
+    width:220px;
+    height:220px;
+    margin:0 auto 36px;
+  }
+  .stage svg{width:100%;height:100%;display:block;}
+  .ring-l{fill:none;stroke:var(--teal);stroke-width:1.4;opacity:0.55;}
+  .ring-r{fill:none;stroke:var(--amber);stroke-width:1.4;opacity:0.55;}
+  .core{fill:var(--bg-panel);stroke:var(--line-strong);stroke-width:1;}
+  .chan-label{font-size:10px;letter-spacing:0.08em;fill:var(--ink-faint);font-family:'Inter',sans-serif;}
+
+  .transport{
+    display:flex;
+    justify-content:center;
+    margin-bottom:44px;
+  }
+  #playBtn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--amber);
+    color:#241505;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:14px 30px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:transform 0.15s ease, background 0.2s ease;
+  }
+  #playBtn:hover{background:#EDB679;}
+  #playBtn:active{transform:scale(0.97);}
+  #playBtn svg{width:16px;height:16px;flex:none;}
+
+  .panel{
+    background:var(--bg-panel);
+    border:0.5px solid var(--line);
+    border-radius:16px;
+    padding:22px 22px 8px;
+  }
+
+  .field{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding-bottom:18px;
+  }
+  .field label{
+    font-size:13px;
+    color:var(--ink-dim);
+    min-width:112px;
+    flex:none;
+  }
+  .field .val{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+    min-width:58px;
+    text-align:right;
+    flex:none;
+    font-variant-numeric:tabular-nums;
+  }
+
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    flex:1;
+    height:3px;
+    background:var(--line-strong);
+    border-radius:2px;
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px;height:16px;
+    border-radius:50%;
+    background:var(--amber);
+    cursor:pointer;
+    border:none;
+    box-shadow:0 0 0 4px rgba(227,165,94,0.15);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--amber);cursor:pointer;border:none;
+    box-shadow:0 0 0 4px rgba(227,165,94,0.15);
+  }
+
+  select{
+    flex:1;
+    background:rgba(255,255,255,0.03);
+    color:var(--ink);
+    border:0.5px solid var(--line-strong);
+    border-radius:8px;
+    padding:8px 10px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    outline:none;
+  }
+  select:focus{border-color:var(--amber);}
+  option{background:var(--bg-panel);color:var(--ink);}
+
+  .presets{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    padding-bottom:20px;
+  }
+  .preset-btn{
+    background:transparent;
+    border:0.5px solid var(--line-strong);
+    color:var(--ink-dim);
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    padding:7px 12px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .preset-btn:hover{border-color:var(--amber);color:var(--ink);}
+  .preset-btn.active{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+
+  .note{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    color:var(--ink-faint);
+    font-size:12.5px;
+    line-height:1.55;
+    text-align:left;
+    margin-top:28px;
+    padding:14px 16px;
+    background:rgba(255,255,255,0.02);
+    border:0.5px solid var(--line);
+    border-radius:12px;
+  }
+  .note svg{width:16px;height:16px;flex:none;margin-top:2px;stroke:var(--teal);}
+
+  footer{
+    text-align:center;
+    color:var(--ink-faint);
+    font-size:11.5px;
+    margin-top:34px;
+    letter-spacing:0.02em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    * { animation-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">7.83 Гц · резонанс Шумана</p>
+  <h1>Дыхание <em>Земли</em><br>в наушниках</h1>
+  <p class="sub">Бинауральные биения, настраиваемые под медитацию, фокус или сон. Генерируются прямо в браузере — без записей, без сжатия.</p>
+
+  <div class="stage">
+    <svg viewBox="0 0 220 220">
+      <circle class="core" cx="110" cy="110" r="70"/>
+      <circle id="ringL" class="ring-l" cx="94" cy="110" r="46"/>
+      <circle id="ringR" class="ring-r" cx="126" cy="110" r="46"/>
+      <text x="94" y="176" text-anchor="middle" class="chan-label">L</text>
+      <text x="126" y="176" text-anchor="middle" class="chan-label">R</text>
+    </svg>
+  </div>
+
+  <div class="transport">
+    <button id="playBtn" type="button">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <span id="playLabel">Начать</span>
+    </button>
+  </div>
+
+  <div class="panel">
+
+    <div class="presets" id="presets">
+      <button class="preset-btn active" data-freq="7.83">Шуман · 7.83</button>
+      <button class="preset-btn" data-freq="4">Тета · 4</button>
+      <button class="preset-btn" data-freq="2.5">Дельта · 2.5</button>
+      <button class="preset-btn" data-freq="10">Альфа · 10</button>
+    </div>
+
+    <div class="field">
+      <label for="beatFreq">Частота биений</label>
+      <input type="range" id="beatFreq" min="1" max="20" step="0.01" value="7.83">
+      <span class="val" id="beatOut">7.83 Гц</span>
+    </div>
+
+    <div class="field">
+      <label for="carrier">Несущий тон</label>
+      <select id="carrier">
+        <option value="100">100 Гц, глубокий</option>
+        <option value="200" selected>200 Гц, стандарт</option>
+        <option value="432">432 Гц, высокий</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="vol">Громкость</label>
+      <input type="range" id="vol" min="0" max="1" step="0.01" value="0.22">
+    </div>
+
+    <div class="field">
+      <label for="timer">Таймер</label>
+      <select id="timer">
+        <option value="0">Без таймера</option>
+        <option value="600">10 минут</option>
+        <option value="1200">20 минут</option>
+        <option value="1800" selected>30 минут</option>
+        <option value="3600">60 минут</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a8 8 0 0 1 8-6v0a8 8 0 0 1 8 6"/><path d="M4 8v8a2 2 0 0 0 2 2h1v-8H4z"/><path d="M20 8v8a2 2 0 0 1-2 2h-1v-8h3z"/></svg>
+    <span>Нужны наушники — левый и правый канал несут слегка разные частоты, и мозг сам достраивает разностный сигнал. Через колонки эффект не работает.</span>
+  </div>
+
+  <footer>Работает офлайн, ничего не записывается и не отправляется никуда</footer>
+
+</div>
+
+<script>
+(function(){
+  const ATTACK = 1.2;
+  const RELEASE = 1.2;
+
+  let ctx=null, oscL=null, oscR=null, gainMaster=null, panL=null, panR=null;
+  let timerHandle=null, playing=false, stopping=false;
+
+  const beatSlider = document.getElementById('beatFreq');
+  const beatOut = document.getElementById('beatOut');
+  const carrierSel = document.getElementById('carrier');
+  const volSlider = document.getElementById('vol');
+  const timerSel = document.getElementById('timer');
+  const playBtn = document.getElementById('playBtn');
+  const playLabel = document.getElementById('playLabel');
+  const playIcon = document.getElementById('playIcon');
+  const ringL = document.getElementById('ringL');
+  const ringR = document.getElementById('ringR');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+
+  const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+  const ICON_PAUSE = '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>';
+
+  function fmtBeat(){
+    beatOut.textContent = parseFloat(beatSlider.value).toFixed(2) + ' Гц';
+  }
+  fmtBeat();
+
+  function syncPresetHighlight(){
+    const cur = parseFloat(beatSlider.value).toFixed(2);
+    presetBtns.forEach(b=>{
+      b.classList.toggle('active', parseFloat(b.dataset.freq).toFixed(2)===cur);
+    });
+  }
+
+  presetBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      beatSlider.value = btn.dataset.freq;
+      fmtBeat();
+      syncPresetHighlight();
+      if(playing && !stopping){
+        const carrier = parseFloat(carrierSel.value);
+        const beat = parseFloat(beatSlider.value);
+        oscR.frequency.linearRampToValueAtTime(carrier+beat, ctx.currentTime+0.15);
+        setPulse(beat);
+      }
+    });
+  });
+
+  beatSlider.addEventListener('input', ()=>{
+    fmtBeat();
+    syncPresetHighlight();
+    if(playing && !stopping){
+      const carrier = parseFloat(carrierSel.value);
+      const beat = parseFloat(beatSlider.value);
+      oscR.frequency.linearRampToValueAtTime(carrier+beat, ctx.currentTime+0.15);
+      setPulse(beat);
+    }
+  });
+
+  carrierSel.addEventListener('change', ()=>{
+    if(playing && !stopping){
+      const carrier = parseFloat(carrierSel.value);
+      const beat = parseFloat(beatSlider.value);
+      oscL.frequency.linearRampToValueAtTime(carrier, ctx.currentTime+0.15);
+      oscR.frequency.linearRampToValueAtTime(carrier+beat, ctx.currentTime+0.15);
+    }
+  });
+
+  volSlider.addEventListener('input', ()=>{
+    if(playing && !stopping && gainMaster){
+      gainMaster.gain.linearRampToValueAtTime(parseFloat(volSlider.value), ctx.currentTime+0.1);
+    }
+  });
+
+  function setPulse(beat){
+    const dur = (1/beat).toFixed(3);
+    ringL.style.animation = 'pulseL ' + dur + 's ease-in-out infinite';
+    ringR.style.animation = 'pulseR ' + dur + 's ease-in-out infinite';
+  }
+  function stopPulse(){
+    ringL.style.animation = 'none';
+    ringR.style.animation = 'none';
+    ringL.style.opacity = '0.55';
+    ringR.style.opacity = '0.55';
+  }
+
+  const styleTag = document.createElement('style');
+  styleTag.textContent =
+    '@keyframes pulseL{0%,100%{opacity:0.25}50%{opacity:0.85}}' +
+    '@keyframes pulseR{0%,100%{opacity:0.85}50%{opacity:0.25}}';
+  document.head.appendChild(styleTag);
+
+  async function start(){
+    ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(ctx.state==='suspended'){ await ctx.resume(); }
+
+    const carrier = parseFloat(carrierSel.value);
+    const beat = parseFloat(beatSlider.value);
+    const vol = parseFloat(volSlider.value);
+    const now = ctx.currentTime;
+
+    oscL = ctx.createOscillator();
+    oscR = ctx.createOscillator();
+    oscL.type = 'sine';
+    oscR.type = 'sine';
+    oscL.frequency.setValueAtTime(carrier, now);
+    oscR.frequency.setValueAtTime(carrier+beat, now);
+
+    panL = ctx.createStereoPanner();
+    panR = ctx.createStereoPanner();
+    panL.pan.value = -1;
+    panR.pan.value = 1;
+
+    gainMaster = ctx.createGain();
+    gainMaster.gain.setValueAtTime(0, now);
+    gainMaster.gain.linearRampToValueAtTime(vol, now+ATTACK);
+
+    oscL.connect(panL).connect(gainMaster);
+    oscR.connect(panR).connect(gainMaster);
+    gainMaster.connect(ctx.destination);
+
+    oscL.start(now);
+    oscR.start(now);
+
+    setPulse(beat);
+    playing = true;
+    stopping = false;
+    playLabel.textContent = 'Остановить';
+    playIcon.innerHTML = ICON_PAUSE;
+
+    const timerSec = parseFloat(timerSel.value);
+    if(timerSec>0){
+      timerHandle = setTimeout(()=>{ stop(); }, timerSec*1000);
+    }
+  }
+
+  function stop(){
+    if(!ctx || stopping) return;
+    stopping = true;
+    const now = ctx.currentTime;
+    gainMaster.gain.cancelScheduledValues(now);
+    gainMaster.gain.setValueAtTime(gainMaster.gain.value, now);
+    gainMaster.gain.linearRampToValueAtTime(0, now+RELEASE);
+
+    const oL=oscL, oR=oscR, closingCtx=ctx;
+    oL.stop(now+RELEASE+0.02);
+    oR.stop(now+RELEASE+0.02);
+    setTimeout(()=>{ closingCtx.close(); }, (RELEASE+0.15)*1000);
+
+    if(timerHandle){ clearTimeout(timerHandle); timerHandle=null; }
+    playing = false;
+    playLabel.textContent = 'Начать';
+    playIcon.innerHTML = ICON_PLAY;
+    stopPulse();
+    ctx = null;
+    stopping = false;
+  }
+
+  playBtn.addEventListener('click', ()=>{
+    if(playing){ stop(); } else { start(); }
+  });
+
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden && playing){
+      // keep playing in background on mobile if allowed; no-op
+    }
+  });
+})();
+</script>
+</body>
+</html>
